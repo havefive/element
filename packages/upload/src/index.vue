@@ -53,6 +53,7 @@ export default {
       default: 'select'
     },
     beforeUpload: Function,
+    beforeRemove: Function,
     onRemove: {
       type: Function,
       default: noop
@@ -91,7 +92,12 @@ export default {
       default: 'text'   // text,picture,picture-card
     },
     httpRequest: Function,
-    disabled: Boolean
+    disabled: Boolean,
+    limit: Number,
+    onExceed: {
+      type: Function,
+      default: noop
+    }
   },
 
   data() {
@@ -170,10 +176,26 @@ export default {
       if (raw) {
         file = this.getFile(raw);
       }
-      this.abort(file);
-      let fileList = this.uploadFiles;
-      fileList.splice(fileList.indexOf(file), 1);
-      this.onRemove(file, fileList);
+      let doRemove = () => {
+        this.abort(file);
+        let fileList = this.uploadFiles;
+        fileList.splice(fileList.indexOf(file), 1);
+        this.onRemove(file, fileList);
+      };
+
+      if (!this.beforeRemove) {
+        doRemove();
+        return;
+      }
+
+      const before = this.beforeRemove(file, this.uploadFiles);
+      if (before && before.then) {
+        before.then(() => {
+          doRemove();
+        }, noop);
+      } else if (before !== false) {
+        doRemove();
+      }
     },
     getFile(rawFile) {
       let fileList = this.uploadFiles;
@@ -239,6 +261,8 @@ export default {
         autoUpload: this.autoUpload,
         listType: this.listType,
         disabled: this.disabled,
+        limit: this.limit,
+        'on-exceed': this.onExceed,
         'on-start': this.handleStart,
         'on-progress': this.handleProgress,
         'on-success': this.handleSuccess,
