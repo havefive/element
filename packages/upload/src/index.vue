@@ -89,7 +89,7 @@ export default {
     },
     listType: {
       type: String,
-      default: 'text'   // text,picture,picture-card
+      default: 'text' // text,picture,picture-card
     },
     httpRequest: Function,
     disabled: Boolean,
@@ -185,16 +185,15 @@ export default {
 
       if (!this.beforeRemove) {
         doRemove();
-        return;
-      }
-
-      const before = this.beforeRemove(file, this.uploadFiles);
-      if (before && before.then) {
-        before.then(() => {
+      } else if (typeof this.beforeRemove === 'function') {
+        const before = this.beforeRemove(file, this.uploadFiles);
+        if (before && before.then) {
+          before.then(() => {
+            doRemove();
+          }, noop);
+        } else if (before !== false) {
           doRemove();
-        }, noop);
-      } else if (before !== false) {
-        doRemove();
+        }
       }
     },
     getFile(rawFile) {
@@ -276,16 +275,16 @@ export default {
 
     const trigger = this.$slots.trigger || this.$slots.default;
     const uploadComponent = (typeof FormData !== 'undefined' || this.$isServer)
-        ? <upload {...uploadData}>{trigger}</upload>
-        : <iframeUpload {...uploadData}>{trigger}</iframeUpload>;
+      ? <upload {...uploadData}>{trigger}</upload>
+      : <iframeUpload {...uploadData}>{trigger}</iframeUpload>;
 
     return (
       <div>
         { this.listType === 'picture-card' ? uploadList : ''}
         {
           this.$slots.trigger
-          ? [uploadComponent, this.$slots.default]
-          : uploadComponent
+            ? [uploadComponent, this.$slots.default]
+            : uploadComponent
         }
         {this.$slots.tip}
         { this.listType !== 'picture-card' ? uploadList : ''}

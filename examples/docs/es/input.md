@@ -1,4 +1,4 @@
-<script>
+﻿<script>
   export default {
     data() {
       return {
@@ -524,7 +524,7 @@ Personalice cómo se muestran las sugerencias.
     methods: {
       querySearch(queryString, cb) {
         var links = this.links;
-        var results = queryString ? link.filter(this.createFilter(queryString)) : links;
+        var results = queryString ? links.filter(this.createFilter(queryString)) : links;
         // call callback function to return suggestion objects
         cb(results);
       },
@@ -643,6 +643,7 @@ Búsqueda de datos desde el servidor.
 | autofocus     | igual que `autofocus` en el input nativo | boolean          | —                                | false       |
 | form          | igual que `form` en el input nativo      | string           | —                                | —           |
 | label         | texto de la etiqueta                     | string           | —                                | —           |
+| tabindex      | orden de tabulacion para el Input        | string           | -                                | -           |
 
 ### Input slots
 

@@ -1,6 +1,7 @@
 @import "mixins/mixins";
 @import "checkbox";
 @import "tag";
+@import "tooltip";
 @import "common/var";
 
 @include b(table) {
@@ -28,7 +29,7 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    color: color($--color-primary s(16%) l(44%));
+    color: $--color-text-secondary;
   }
 
   // 展开行
@@ -168,6 +169,7 @@
     overflow: hidden;
     user-select: none;
     text-align: left;
+    background-color: $--table-header-background;
 
     div {
       display: inline-block;
@@ -442,6 +444,7 @@
     height: 0;
     border: solid 5px transparent;
     position: absolute;
+    left: 7px;
 
     &.ascending {
       border-bottom-color: $--color-text-placeholder;

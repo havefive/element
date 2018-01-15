@@ -216,9 +216,11 @@
 
         return sums;
       },
+
       setCurrent(row) {
         this.$refs.singleTable.setCurrentRow(row);
       },
+
       toggleSelection(rows) {
         if (rows) {
           rows.forEach(row => {
@@ -240,6 +242,7 @@
       handleDelete(index, row) {
         console.log(index, row);
       },
+
       handleSelectionChange(val) {
         this.multipleSelection = val;
       },
@@ -254,6 +257,11 @@
 
       filterTag(value, row) {
         return row.tag === value;
+      },
+
+      filterHandler(value, row, column) {
+        const property = column['property'];
+        return row[property] === value;
       },
 
       tableRowClassName({row, rowIndex}) {
@@ -1326,7 +1334,7 @@ Sort the data to find or compare data quickly.
 
 Filter the table to find desired data.
 
-:::demo Set attribute `filters` and `filter-method` in `el-table-column` makes this column filterable. `filters` is an array, and `filter-method` is a function deciding which rows are displayed. It has two parameters: `value` and `row`.
+:::demo Set attribute `filters` and `filter-method` in `el-table-column` makes this column filterable. `filters` is an array, and `filter-method` is a function deciding which rows are displayed. It has three parameters: `value`, `row` and `column`.
 ```html
 <template>
   <el-table
@@ -1336,7 +1344,10 @@ Filter the table to find desired data.
       prop="date"
       label="Date"
       sortable
-      width="180">
+      width="180"
+      :filters="[{text: '2016-05-01', value: '2016-05-01'}, {text: '2016-05-02', value: '2016-05-02'}, {text: '2016-05-03', value: '2016-05-03'}, {text: '2016-05-04', value: '2016-05-04'}]"
+      :filter-method="filterHandler"
+    >
     </el-table-column>
     <el-table-column
       prop="name"
@@ -1397,6 +1408,10 @@ Filter the table to find desired data.
       },
       filterTag(value, row) {
         return row.tag === value;
+      },
+      filterHandler(value, row, column) {
+        const property = column['property'];
+        return row[property] === value;
       }
     }
   }
@@ -1407,7 +1422,7 @@ Filter the table to find desired data.
 ### Custom column template
 
 Customize table column so it can be integrated with other components.
-:::demo You have access to the following data: row, column, $index and store (state management of Table) by [Scoped slot](https://vuejs.org/v2/guide/components.html#Scoped-Slots). (Scoped slots is supported from `1.1`, `inline-template` still works, but it's not recommended).
+:::demo You have access to the following data: row, column, $index and store (state management of Table) by [Scoped slot](https://vuejs.org/v2/guide/components.html#Scoped-Slots).
 ```html
 <template>
   <el-table
@@ -1944,8 +1959,8 @@ You can customize row index in `type=index` columns.
 | current-row-key | key of current row, a set only prop | string,number | — | — |
 | row-class-name | function that returns custom class names for a row, or a string assigning class names for every row | Function({row, rowIndex})/String | — | — |
 | row-style | function that returns custom style for a row, or an object assigning custom style for every row | Function({row, rowIndex})/Object | — | — |
-| cell-class-name | function that returns custom class names for a cell, or a string assigning class names for every cell | Function({row, rowIndex})/String | — | — |
-| cell-style | function that returns custom style for a cell, or an object assigning custom style for every cell | Function({row, rowIndex})/Object | — | — |
+| cell-class-name | function that returns custom class names for a cell, or a string assigning class names for every cell | Function({row, column, rowIndex, columnIndex})/String | — | — |
+| cell-style | function that returns custom style for a cell, or an object assigning custom style for every cell | Function({row, column, rowIndex, columnIndex})/Object | — | — |
 | header-row-class-name | function that returns custom class names for a row in table header, or a string assigning class names for every row in table header | Function({row, rowIndex})/String | — | — |
 | header-row-style | function that returns custom style for a row in table header, or an object assigning custom style for every row in table header | Function({row, rowIndex})/Object | — | — |
 | header-cell-class-name | function that returns custom class names for a cell in table header, or a string assigning class names for every cell in table header | Function({row, rowIndex})/String | — | — |
@@ -2024,5 +2039,5 @@ You can customize row index in `type=index` columns.
 | filters | an array of data filtering options. For each element in this array, `text` and `value` are required | Array[{ text, value }] | — | — |
 | filter-placement | placement for the filter dropdown | String | same as Tooltip's `placement` | — |
 | filter-multiple | whether data filtering supports multiple options | Boolean | — | true |
-| filter-method | data filtering method. If `filter-multiple` is on, this method will be called multiple times for each row, and a row will display if one of the calls returns `true` | Function(value, row) | — | — |
+| filter-method | data filtering method. If `filter-multiple` is on, this method will be called multiple times for each row, and a row will display if one of the calls returns `true` | Function(value, row, column) | — | — |
 | filtered-value | filter value for selected data, might be useful when table header is rendered with `render-header` | Array | — | — |

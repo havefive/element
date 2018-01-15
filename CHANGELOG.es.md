@@ -1,5 +1,35 @@
 ## Changelog
 
+### 2.0.11
+
+*2018-01-08*
+
+- Corregido el problema de color del borde del Select cuando está el slot `prepend` o `append`  del Input, #9089
+- Corregido el parámetro  `remove-tag` de Select, #9090
+- Añadido los atributos `show-timeout` y `hide-timeout` para SubMenu, #8934 (por @HugoLew)
+- Corregido el estilo de Tooltip de  `show-overflow-tooltip`  que faltaba cuando Table era importada bajo demanda, #9130
+- Se ha corregido el mal funcionamiento de ordenación de la columna de Table despues que  `clearSort`  era ejecutado en esa columna, #9100 (por @zEmily)
+- El fichero de configuración i18n para el checo se renombra de `cz` a `cs-CZ`, #9164
+
+### 2.0.10
+
+*2017-12-29*
+
+- Corregido el calculo incorrecto de la altura máxima de Table cuando fixed column y summary row coexisten, #9026
+- Solucionado el estilo de color que no lo compilaba para textos vacíos en Table, #9028
+- Ahora DatePicker sólo emite el evento `change` cuando el valor cambia verdaderamente, #9029 (by @remizovvv)
+- Añadido atributo `tabindex` para Input, #9041 (by @dicklwm)
+
+### 2.0.9🎄
+
+*2017-12-24*
+
+- Añadida la función de enganche (hook) `before-remove`  para Upload, #8788 (by @firesh)
+- Arreglado el valor inicial de error que no funcionaba para FormItem, #8840
+- Ahora la directiva Loading soporta nombre de clase personalizado asignando el atributo `element-loading-custom-class`, #8826 (por @earlymeme)
+- Arreglado CarouselItem que se ponía invisible cuando los datos eran actualizados asincrónicamente, #8921
+- Añadido el atributo `renderAfterExpand` para Tree, #8972
+
 ### 2.0.8
 
 *2017-12-12*
@@ -75,9 +105,6 @@
 
 *2017-10-28*
 
-- Fixed style error of RadioButton and CheckboxButton, #7793
-- Fixed TimePicker not respond to mouse scroll in some conditions, #7811
-- Fixed incomplete styles of some components when imported on demand, #7811
 - Corregido error de estilo de RadioButton y CheckboxButton, #7793
 - Corregido TimePicker no responde al desplazamiento del ratón en algunas condiciones, #7811
 - Corregido estilos incompletos de algunos componentes cuando se importan bajo demanda, #7811

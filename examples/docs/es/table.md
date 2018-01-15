@@ -240,6 +240,7 @@
       handleDelete(index, row) {
         console.log(index, row);
       },
+
       handleSelectionChange(val) {
         this.multipleSelection = val;
       },
@@ -255,7 +256,12 @@
       filterTag(value, row) {
         return row.tag === value;
       },
-    
+
+      filterHandler(value, row, column) {
+        const property = column['property'];
+        return row[property] === value;
+      },
+
       tableRowClassName({row, rowIndex}) {
         if (rowIndex === 1) {
           return 'warning-row';
@@ -1326,7 +1332,7 @@ Ordena los datos para encontrar o comparar información rápidamente.
 
 Filtra la tabla para encontrar la información que necesita.
 
-:::demo Establezca el atributo `filters` y `filter-method` en `el-table-column` haciendo esta columna filtrable. `filters` es un arreglo, y `filter-method` es una función que decide que filas se muestra. Esta tiene dos parámetros: `value` y `row`.
+:::demo Establezca el atributo `filters` y `filter-method` en `el-table-column` haciendo esta columna filtrable. `filters` es un arreglo, y `filter-method` es una función que decide que filas se muestra. Esta tiene tres parámetros: `value`, `row` y `column`.
 ```html
 <template>
   <el-table
@@ -1336,7 +1342,10 @@ Filtra la tabla para encontrar la información que necesita.
       prop="date"
       label="Fecha"
       sortable
-      width="180">
+      width="180"
+      :filters="[{text: '2016-05-01', value: '2016-05-01'}, {text: '2016-05-02', value: '2016-05-02'}, {text: '2016-05-03', value: '2016-05-03'}, {text: '2016-05-04', value: '2016-05-04'}]"
+      :filter-method="filterHandler"
+    >
     </el-table-column>
     <el-table-column
       prop="name"
@@ -1397,6 +1406,10 @@ Filtra la tabla para encontrar la información que necesita.
       },
       filterTag(value, row) {
         return row.tag === value;
+      },
+      filterHandler(value, row, column) {
+        const property = column['property'];
+        return row[property] === value;
       }
     }
   }
@@ -1408,7 +1421,7 @@ Filtra la tabla para encontrar la información que necesita.
 
 Personalice la columna de la tabla para que pueda integrarse con otros componentes.
 
-:::demo Tiene acceso a la siguiente informacion: row, column, $index, store (gestor de estados de la tabla) por [Scoped slots](https://vuejs.org/v2/guide/components.html#Scoped-Slots). (Los Scoped Slots son soportados desde `1.1`, `inline-template` todavía funciona, pero no es recomendado).
+:::demo Tiene acceso a la siguiente informacion: row, column, $index, store (gestor de estados de la tabla) por [Scoped slots](https://vuejs.org/v2/guide/components.html#Scoped-Slots).
 ```html
 <template>
   <el-table
@@ -1949,8 +1962,8 @@ Puede personalizar el índice de la fila con la propiedad `type=index` de las co
 | current-row-key        | clave de la fila actual, un ajuste de propiedad única | string,number                            | —                              | —                                        |
 | row-class-name         | función que devuelve nombres de clases personalizadas para una fila, o una cadena asignando nombres de clases para cada fila | Function({row, rowIndex})/String         | —                              | —                                        |
 | row-style              | función que devuelve el estilo personalizado para una fila, o un objeto asignando estilos personalizado para cada fila | Function({row, rowIndex})/Object         | —                              | —                                        |
-| cell-class-name        | función que devuelve nombres de clases personalizadas para una celda, o una cadena asignando nombres de clases para cada celda | Function({row, rowIndex})/String         | —                              | —                                        |
-| cell-style             | función que devuelve estilos personalizados para una celda, o un objeto asignado a estilos personalizados para cada celda | Function({row, rowIndex})/Object         | —                              | —                                        |
+| cell-class-name        | función que devuelve nombres de clases personalizadas para una celda, o una cadena asignando nombres de clases para cada celda | Function({row, column, rowIndex, columnIndex})/String         | —                              | —                                        |
+| cell-style             | función que devuelve estilos personalizados para una celda, o un objeto asignado a estilos personalizados para cada celda | Function({row, column, rowIndex, columnIndex})/Object         | —                              | —                                        |
 | header-row-class-name  | función que devuelve nombre de clases personalizadas para una fila en la cabecera de la tabla, o una cadena asignando nombres de clases para cada fila en la cabecera de la tabla | Function({row, rowIndex})/String         | —                              | —                                        |
 | header-row-style       | función que devuelve estilos personalizados para una fila en la cabecera de la tabla, o un objeto asignando estilos personalizados para cada fila en la cabecera de la tabla | Function({row, rowIndex})/Object         | —                              | —                                        |
 | header-cell-class-name | función que devuelve nombre de clases personalizadas para una celda en la cabecera de la tabla, o una cadena asignando nombres de clases para cada celda en la cabecera de la tabla | Function({row, rowIndex})/String         | —                              | —                                        |
@@ -2028,5 +2041,5 @@ Puede personalizar el índice de la fila con la propiedad `type=index` de las co
 | filters               | un arreglo de opciones para filtrado de datos. Para cada elemento en este arreglo, `text` y `value` son obligatorios | Array[{ text, value }]            | —                             | —           |
 | filter-placement      | colocación para el menu desplegable del filtro | String                            | same as Tooltip's `placement` | —           |
 | filter-multiple       | especifica si el filtrado de datos soporta múltiples opciones | Boolean                           | —                             | true        |
-| filter-method         | método para filtrado de datos. Si `filter-multiple` está habilitado, este método se invocará varias veces para cada fila, y una fila puede mostrar si una de las llamadas devuelve `true` | Function(value, row)              | —                             | —           |
+| filter-method         | método para filtrado de datos. Si `filter-multiple` está habilitado, este método se invocará varias veces para cada fila, y una fila puede mostrar si una de las llamadas devuelve `true` | Function(value, row, column)              | —                             | —           |
 | filtered-value        | el valor del filtro para los datos seleccionados, puede ser útil cuando el encabezado de la tabla se representará con `render-header` | Array                             | —                             | —           |

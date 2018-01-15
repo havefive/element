@@ -12,7 +12,7 @@
       <span v-if="collapseTags && selected.length">
         <el-tag
           :closable="!disabled"
-          size="small"
+          :size="collapseTagSize"
           :hit="selected[0].hitState"
           type="info"
           @close="deleteTag($event, selected[0])"
@@ -22,7 +22,7 @@
         <el-tag
           v-if="selected.length > 1"
           :closable="false"
-          size="small"
+          :size="collapseTagSize"
           type="info"
           disable-transitions>
           <span class="el-select__tags-text">+ {{ selected.length - 1 }}</span>
@@ -204,6 +204,12 @@
 
       selectSize() {
         return this.size || this._elFormItemSize || (this.$ELEMENT || {}).size;
+      },
+
+      collapseTagSize() {
+        return ['small', 'mini'].indexOf(this.selectSize) > -1
+          ? 'mini'
+          : 'small';
       }
     },
 
@@ -558,7 +564,7 @@
       },
 
       resetInputHeight() {
-        if (this.collapseTags) return;
+        if (this.collapseTags && !this.filterable) return;
         this.$nextTick(() => {
           if (!this.$refs.reference) return;
           let inputChildNodes = this.$refs.reference.$el.childNodes;
@@ -660,7 +666,7 @@
           value.splice(index, 1);
           this.$emit('input', value);
           this.emitChange(value);
-          this.$emit('remove-tag', tag);
+          this.$emit('remove-tag', tag.value);
         }
         event.stopPropagation();
       },

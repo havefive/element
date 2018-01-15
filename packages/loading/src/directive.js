@@ -37,15 +37,17 @@ exports.install = Vue => {
       });
     } else {
       if (el.domVisible) {
-        el.instance.$on('after-leave', _ => {
+        el.instance.$once('after-leave', _ => {
           el.domVisible = false;
           const target = binding.modifiers.fullscreen || binding.modifiers.body
             ? document.body
             : el;
           removeClass(target, 'el-loading-parent--relative');
           removeClass(target, 'el-loading-parent--hidden');
+          el.instance.hiding = false;
         });
         el.instance.visible = false;
+        el.instance.hiding = true;
       }
     }
   };
@@ -65,7 +67,11 @@ exports.install = Vue => {
 
       parent.appendChild(el.mask);
       Vue.nextTick(() => {
-        el.instance.visible = true;
+        if (el.instance.hiding) {
+          el.instance.$emit('after-leave');
+        } else {
+          el.instance.visible = true;
+        };
       });
       el.domInserted = true;
     }
@@ -76,6 +82,7 @@ exports.install = Vue => {
       const textExr = el.getAttribute('element-loading-text');
       const spinnerExr = el.getAttribute('element-loading-spinner');
       const backgroundExr = el.getAttribute('element-loading-background');
+      const customClassExr = el.getAttribute('element-loading-custom-class');
       const vm = vnode.context;
       const mask = new Mask({
         el: document.createElement('div'),
@@ -83,6 +90,7 @@ exports.install = Vue => {
           text: vm && vm[textExr] || textExr,
           spinner: vm && vm[spinnerExr] || spinnerExr,
           background: vm && vm[backgroundExr] || backgroundExr,
+          customClass: vm && vm[customClassExr] || customClassExr,
           fullscreen: !!binding.modifiers.fullscreen
         }
       });
@@ -105,6 +113,7 @@ exports.install = Vue => {
         el.mask &&
         el.mask.parentNode &&
         el.mask.parentNode.removeChild(el.mask);
+        toggleLoading(el, { value: false, modifiers: binding.modifiers });
       }
     }
   });
