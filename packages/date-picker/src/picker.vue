@@ -3,10 +3,10 @@
     class="el-date-editor"
     :class="'el-date-editor--' + type"
     :readonly="!editable || readonly"
-    :disabled="disabled"
+    :disabled="pickerDisabled"
     :size="pickerSize"
-    :id="id"
     :name="name"
+    v-bind="firstInputId"
     v-if="!ranged"
     v-clickoutside="handleClose"
     :placeholder="placeholder"
@@ -14,12 +14,16 @@
     @keydown.native="handleKeydown"
     :value="displayValue"
     @input="value => userInput = value"
+    @change="handleChange"
     @mouseenter.native="handleMouseEnter"
     @mouseleave.native="showClose = false"
-    @change.native="handleChange"
     :validateEvent="false"
-    :prefix-icon="triggerClass"
     ref="reference">
+    <i slot="prefix"
+      class="el-input__icon"
+      :class="triggerClass"
+      @click="handleFocus">
+    </i>
     <i slot="suffix"
       class="el-input__icon"
       @click="handleClickIcon"
@@ -32,7 +36,7 @@
     :class="[
       'el-date-editor--' + type,
       pickerSize ? `el-range-editor--${ pickerSize }` : '',
-      disabled ? 'is-disabled' : '',
+      pickerDisabled ? 'is-disabled' : '',
       pickerVisible ? 'is-active' : ''
     ]"
     @click="handleRangeClick"
@@ -46,8 +50,8 @@
     <input
       :placeholder="startPlaceholder"
       :value="displayValue && displayValue[0]"
-      :disabled="disabled"
-      :id="id && id[0]"
+      :disabled="pickerDisabled"
+      v-bind="firstInputId"
       :readonly="!editable || readonly"
       :name="name && name[0]"
       @input="handleStartInput"
@@ -58,8 +62,8 @@
     <input
       :placeholder="endPlaceholder"
       :value="displayValue && displayValue[1]"
-      :disabled="disabled"
-      :id="id && id[1]"
+      :disabled="pickerDisabled"
+      v-bind="secondInputId"
       :readonly="!editable || readonly"
       :name="name && name[1]"
       @input="handleEndInput"
@@ -81,7 +85,6 @@ import Clickoutside from 'element-ui/src/utils/clickoutside';
 import { formatDate, parseDate, isDateObject, getWeekNumber } from './util';
 import Popper from 'element-ui/src/utils/vue-popper';
 import Emitter from 'element-ui/src/mixins/emitter';
-import Focus from 'element-ui/src/mixins/focus';
 import ElInput from 'element-ui/packages/input';
 import merge from 'element-ui/src/utils/merge';
 
@@ -89,7 +92,8 @@ const NewPopper = {
   props: {
     appendToBody: Popper.props.appendToBody,
     offset: Popper.props.offset,
-    boundariesPadding: Popper.props.boundariesPadding
+    boundariesPadding: Popper.props.boundariesPadding,
+    arrowOffset: Popper.props.arrowOffset
   },
   methods: Popper.methods,
   data() {
@@ -122,9 +126,11 @@ const HAVE_TRIGGER_TYPES = [
   'datetimerange'
 ];
 const DATE_FORMATTER = function(value, format) {
+  if (format === 'timestamp') return value.getTime();
   return formatDate(value, format);
 };
 const DATE_PARSER = function(text, format) {
+  if (format === 'timestamp') return new Date(Number(text));
   return parseDate(text, format);
 };
 const RANGE_FORMATTER = function(value, format) {
@@ -133,7 +139,7 @@ const RANGE_FORMATTER = function(value, format) {
     const end = value[1];
 
     if (start && end) {
-      return [formatDate(start, format), formatDate(end, format)];
+      return [DATE_FORMATTER(start, format), DATE_FORMATTER(end, format)];
     }
   }
   return '';
@@ -146,7 +152,7 @@ const RANGE_PARSER = function(array, format, separator) {
     const range1 = array[0];
     const range2 = array[1];
 
-    return [parseDate(range1, format), parseDate(range2, format)];
+    return [DATE_PARSER(range1, format), DATE_PARSER(range2, format)];
   }
   return [];
 };
@@ -293,9 +299,12 @@ const validator = function(val) {
 };
 
 export default {
-  mixins: [Emitter, NewPopper, Focus('reference')],
+  mixins: [Emitter, NewPopper],
 
   inject: {
+    elForm: {
+      default: ''
+    },
     elFormItem: {
       default: ''
     }
@@ -338,6 +347,7 @@ export default {
     },
     value: {},
     defaultValue: {},
+    defaultTime: {},
     rangeSeparator: {
       default: '-'
     },
@@ -361,7 +371,7 @@ export default {
 
   watch: {
     pickerVisible(val) {
-      if (this.readonly || this.disabled) return;
+      if (this.readonly || this.pickerDisabled) return;
       if (val) {
         this.showPicker();
         this.valueOnOpen = this.value;
@@ -478,6 +488,32 @@ export default {
 
     pickerSize() {
       return this.size || this._elFormItemSize || (this.$ELEMENT || {}).size;
+    },
+
+    pickerDisabled() {
+      return this.disabled || (this.elForm || {}).disabled;
+    },
+
+    firstInputId() {
+      const obj = {};
+      let id;
+      if (this.ranged) {
+        id = this.id && this.id[0];
+      } else {
+        id = this.id;
+      }
+      if (id) obj.id = id;
+      return obj;
+    },
+
+    secondInputId() {
+      const obj = {};
+      let id;
+      if (this.ranged) {
+        id = this.id && this.id[1];
+      }
+      if (id) obj.id = id;
+      return obj;
     }
   },
 
@@ -488,9 +524,19 @@ export default {
       gpuAcceleration: false
     };
     this.placement = PLACEMENT_MAP[this.align] || PLACEMENT_MAP.left;
+
+    this.$on('fieldReset', this.handleFieldReset);
   },
 
   methods: {
+    focus() {
+      if (!this.ranged) {
+        this.$refs.reference.focus();
+      } else {
+        this.handleFocus();
+      }
+    },
+
     blur() {
       this.refInput.forEach(input => input.blur());
     },
@@ -526,7 +572,7 @@ export default {
     },
 
     handleMouseEnter() {
-      if (this.readonly || this.disabled) return;
+      if (this.readonly || this.pickerDisabled) return;
       if (!this.valueIsEmpty && this.clearable) {
         this.showClose = true;
       }
@@ -542,6 +588,11 @@ export default {
             this.userInput = null;
           }
         }
+      }
+      if (this.userInput === '') {
+        this.emitInput(null);
+        this.emitChange(null);
+        this.userInput = null;
       }
     },
 
@@ -588,8 +639,9 @@ export default {
     },
 
     handleClickIcon(event) {
-      if (this.readonly || this.disabled) return;
+      if (this.readonly || this.pickerDisabled) return;
       if (this.showClose) {
+        this.valueOnOpen = this.value;
         event.stopPropagation();
         this.emitInput(null);
         this.emitChange(null);
@@ -604,6 +656,10 @@ export default {
 
     handleClose() {
       this.pickerVisible = false;
+    },
+
+    handleFieldReset(initialValue) {
+      this.userInput = initialValue;
     },
 
     handleFocus() {
@@ -646,9 +702,8 @@ export default {
       }
 
       // Enter
-      if (keyCode === 13 && this.displayValue) {
-        const value = this.parseString(this.displayValue);
-        if (this.isValidValue(value)) {
+      if (keyCode === 13) {
+        if (this.userInput === '' || this.isValidValue(this.parseString(this.displayValue))) {
           this.handleChange();
           this.pickerVisible = this.picker.visible = false;
           this.blur();
@@ -706,6 +761,7 @@ export default {
     mountPicker() {
       this.picker = new Vue(this.panel).$mount();
       this.picker.defaultValue = this.defaultValue;
+      this.picker.defaultTime = this.defaultTime;
       this.picker.popperClass = this.popperClass;
       this.popperElm = this.picker.$el;
       this.picker.width = this.reference.getBoundingClientRect().width;
@@ -713,9 +769,9 @@ export default {
       this.picker.selectionMode = this.selectionMode;
       this.picker.unlinkPanels = this.unlinkPanels;
       this.picker.arrowControl = this.arrowControl || this.timeArrowControl || false;
-      if (this.format) {
-        this.picker.format = this.format;
-      }
+      this.$watch('format', (format) => {
+        this.picker.format = format;
+      });
 
       const updateOptions = () => {
         const options = this.pickerOptions;
@@ -735,6 +791,11 @@ export default {
               option !== 'selectableRange') {
             this.picker[option] = options[option];
           }
+        }
+
+        // main format must prevail over undocumented pickerOptions.format
+        if (this.format) {
+          this.picker.format = this.format;
         }
       };
       updateOptions();

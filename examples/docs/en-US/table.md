@@ -1946,9 +1946,9 @@ You can customize row index in `type=index` columns.
 
 ### Table Attributes
 | Attribute      | Description          | Type      | Accepted Values       | Default  |
-|---------- |-------------- |---------- |--------------------------------  |-------- |
+|----------------|----------------------|-----------|-----------------------|----------|
 | data | Table data | array | — | — |
-| height | Table's height. By default it has an `auto` height. If its value is a number, the height is measured in pixels; if its value is a string, the height is affected by external styles | string/number | — | — |
+| height | Table's height. By default it has an `auto` height. If its value is a number, the height is measured in pixels; if its value is a string, the value will be assigned to element's style.height, the height is affected by external styles | string/number | — | — |
 | max-height | Table's max-height. The height of the table starts from `auto` until it reaches the maxHeight limit. The `maxHeight` is measured in pixels, same as `height` | string/number | — | — |
 | stripe | whether Table is striped | boolean | — | false |
 | border | whether Table has vertical border | boolean | — | false |
@@ -1975,6 +1975,7 @@ You can customize row index in `type=index` columns.
 | sum-text | displayed text for the first column of summary row | String | — | Sum |
 | summary-method | custom summary method | Function({ columns, data }) | — | — |
 | span-method | method that returns rowspan and colspan | Function({ row, column, rowIndex, columnIndex }) | — | — |
+| select-on-indeterminate | controls the behavior of master checkbox in multi-select tables when only some rows are selected (but not all). If true, all rows will be selected, else deselected. | Boolean | — | true |
 
 ### Table Events
 | Event Name | Description | Parameters |
@@ -1990,10 +1991,11 @@ You can customize row index in `type=index` columns.
 | row-contextmenu | triggers when user right clicks on a row | row, event |
 | row-dblclick | triggers when double clicking a row | row, event |
 | header-click | triggers when clicking a column header | column, event |
+| header-contextmenu | triggers when user right clicks on a column header | column, event |
 | sort-change | triggers when Table's sorting changes | { column, prop, order } |
 | filter-change | column's key. If you need to use the filter-change event, this attribute is mandatory to identify which column is being filtered | filters |
 | current-change | triggers when current row changes | currentRow, oldCurrentRow |
-| header-dragend | triggers when finish dragging header | newWidth, oldWidth, column, event |
+| header-dragend | triggers after changing a column's width by dragging the column header's border | newWidth, oldWidth, column, event |
 | expand-change | triggers when user expands or collapses a row | row, expandedRows |
 
 ### Table Methods
@@ -2041,3 +2043,8 @@ You can customize row index in `type=index` columns.
 | filter-multiple | whether data filtering supports multiple options | Boolean | — | true |
 | filter-method | data filtering method. If `filter-multiple` is on, this method will be called multiple times for each row, and a row will display if one of the calls returns `true` | Function(value, row, column) | — | — |
 | filtered-value | filter value for selected data, might be useful when table header is rendered with `render-header` | Array | — | — |
+
+### Table-column Scoped Slot
+| Name | Description |
+|------|--------|
+| — | Custom content for table columns. The scope parameter is { row, column, $index } |

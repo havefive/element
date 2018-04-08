@@ -1684,7 +1684,7 @@
       label="数值 3">
     </el-table-column>
   </el-table>
-  
+
   <el-table
     :data="tableData6"
     border
@@ -2008,7 +2008,7 @@
 | 参数      | 说明          | 类型      | 可选值                           | 默认值  |
 |---------- |-------------- |---------- |--------------------------------  |-------- |
 | data | 显示的数据 | array | — | — |
-| height | Table 的高度，默认为自动高度。如果 height 为 number 类型，单位 px；如果 height 为 string 类型，则 Table 的高度受控于外部样式。  | string/number | — | — |
+| height | Table 的高度，默认为自动高度。如果 height 为 number 类型，单位 px；如果 height 为 string 类型，则这个高度会设置为 Table 的 style.height 的值，Table 的高度会受控于外部样式。  | string/number | — | — |
 | max-height | Table 的最大高度 | string/number | — | — |
 | stripe | 是否为斑马纹 table | boolean | — | false |
 | border | 是否带有纵向边框 | boolean | — | false |
@@ -2035,6 +2035,7 @@
 | sum-text | 合计行第一列的文本 | String | — | 合计 |
 | summary-method | 自定义的合计计算方法 | Function({ columns, data }) | — | — |
 | span-method | 合并行或列的计算方法 | Function({ row, column, rowIndex, columnIndex }) | — | — |
+| select-on-indeterminate | 在多选表格中，当仅有部分行被选中时，点击表头的多选框时的行为。若为 true，则选中所有行；若为 false，则取消选择所有行 | Boolean | — | true |
 
 ### Table Events
 | 事件名 | 说明 | 参数 |
@@ -2050,6 +2051,7 @@
 | row-contextmenu | 当某一行被鼠标右键点击时会触发该事件 | row, event |
 | row-dblclick | 当某一行被双击时会触发该事件 | row, event |
 | header-click | 当某一列的表头被点击时会触发该事件 | column, event |
+| header-contextmenu | 当某一列的表头被鼠标右键点击时触发该事件 | column, event |
 | sort-change | 当表格的排序条件发生变化的时候会触发该事件 | { column, prop, order } |
 | filter-change | 当表格的筛选条件发生变化的时候会触发该事件，参数的值是一个对象，对象的 key 是 column 的 columnKey，对应的 value 为用户选择的筛选条件的数组。 | filters |
 | current-change | 当表格的当前行发生变化的时候会触发该事件，如果要高亮当前行，请打开表格的 highlight-current-row 属性 | currentRow, oldCurrentRow |
@@ -2101,3 +2103,8 @@
 | filter-multiple | 数据过滤的选项是否多选 | Boolean | — | true |
 | filter-method | 数据过滤使用的方法，如果是多选的筛选项，对每一条数据会执行多次，任意一次返回 true 就会显示。 | Function(value, row, column) | — | — |
 | filtered-value | 选中的数据过滤项，如果需要自定义表头过滤的渲染方式，可能会需要此属性。 | Array | — | — |
+
+### Table-column Scoped Slot
+| name | 说明 |
+|------|--------|
+| — | 自定义列的内容，参数为 { row, column, $index } |
