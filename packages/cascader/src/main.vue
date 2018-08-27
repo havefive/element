@@ -30,6 +30,7 @@
       :validate-event="false"
       :size="size"
       :disabled="cascaderDisabled"
+      :class="{ 'is-focus': menuVisible }"
     >
       <template slot="suffix">
         <i
@@ -70,7 +71,7 @@ import emitter from 'element-ui/src/mixins/emitter';
 import Locale from 'element-ui/src/mixins/locale';
 import { t } from 'element-ui/src/locale';
 import debounce from 'throttle-debounce/debounce';
-import { generateId } from 'element-ui/src/utils/util';
+import { generateId, escapeRegexpString } from 'element-ui/src/utils/util';
 
 const popperMixin = {
   props: {
@@ -337,7 +338,8 @@ export default {
       }
 
       let filteredFlatOptions = flatOptions.filter(optionsStack => {
-        return optionsStack.some(option => new RegExp(value, 'i').test(option[this.labelKey]));
+        return optionsStack.some(option => new RegExp(escapeRegexpString(value), 'i')
+          .test(option[this.labelKey]));
       });
 
       if (filteredFlatOptions.length > 0) {
